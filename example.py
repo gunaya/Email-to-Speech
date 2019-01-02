@@ -42,8 +42,10 @@ def main():
     # deteksi bahasa
     lang = detect(message['snippet'])
     print(lang)
-    if not lang == 'en':
+    if lang == 'id':
         language = 'id'
+    elif lang == 'en':
+        language = 'en'
     else:
         language = 'en'
 
