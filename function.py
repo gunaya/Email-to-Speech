@@ -14,7 +14,10 @@ from langdetect import detect
 SCOPES = 'https://www.googleapis.com/auth/gmail.readonly'
 
 class email2speak:
-    def get_sender(self):
+    def gmail_api(self):
+        # The file token.json stores the user's access and refresh tokens, and is
+        # created automatically when the authorization flow completes for the first
+        # time.
         store = file.Storage('token.json')
         creds = store.get()
         if not creds or creds.invalid:
@@ -27,46 +30,35 @@ class email2speak:
         message_id = results['messages'][0]['id']
         message = service.users().messages().get(userId='me', id=message_id).execute()
 
-        mesega = message['payload']['headers']
-        sender = mesega[16]['value']
+        # print(message)
+        return message
 
+    def get_sender(self):
+        message = self.gmail_api()
+        if message is None:
+            sender = 'none'
+        else:
+            mesega = message['payload']['headers']
+            sender = mesega[16]['value']
         return sender
 
     def get_message(self):
-        """Shows basic usage of the Gmail API.
-        Lists the user's Gmail labels.
-        """
-        # The file token.json stores the user's access and refresh tokens, and is
-        # created automatically when the authorization flow completes for the first
-        # time.
-        store = file.Storage('token.json')
-        creds = store.get()
-        if not creds or creds.invalid:
-            flow = client.flow_from_clientsecrets('credentials_dummy.json', SCOPES)
-            creds = tools.run_flow(flow, store)
-        service = build('gmail', 'v1', http=creds.authorize(Http()))
+        message = self.gmail_api()
+        if message is None:
+            message_final = 'none'
+        else:
+            # now the message object contains the entire recent message
+            mesega = message['payload']['parts']
+            msg_raw = mesega[0]['body']['data']
 
-        # Call the Gmail API
-        results = service.users().messages().list(userId='me', labelIds=['UNREAD','CATEGORY_PERSONAL','INBOX'], maxResults=1).execute()
+            #decode base64
+            msg_clean = msg_raw.replace("-", "+")
+            msg_clean = msg_clean.replace("_", "/")
 
-        # get the message id from the results object
-        message_id = results['messages'][0]['id']
+            msg_clean = base64.b64decode(msg_clean)
 
-        # use the message id to get the actual message, including any attachments
-        message = service.users().messages().get(userId='me', id=message_id).execute()
-
-        # now the message object contains the entire recent message
-        mesega = message['payload']['parts']
-        msg_raw = mesega[0]['body']['data']
-
-        #decode base64
-        msg_clean = msg_raw.replace("-", "+")
-        msg_clean = msg_clean.replace("_", "/")
-
-        msg_clean = base64.b64decode(msg_clean)
-
-        #remove  b' \r \n
-        message_final = msg_clean.decode().strip()
+            #remove  b' \r \n
+            message_final = msg_clean.decode().strip()
 
         return message_final
 
@@ -79,10 +71,12 @@ class email2speak:
         if lang == 'id':
             op_sender = 'pesan dikirim oleh '
             op_message = '. Berikut isi pesannya. '
+            print('Pesan Berbahasa Indonesia')
             language = 'id'
         elif lang == 'en':
             op_sender = 'message sent by '
             op_message = '. Content of the message is, '
+            print('Pesan Berbahasa Inggris')
             language = 'en'
         else:
             op_sender = 'message sent by '

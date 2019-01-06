@@ -77,7 +77,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "Email2Speech"))
         self.label_2.setText(_translate("MainWindow", "Message"))
         self.stopBtn.setText(_translate("MainWindow", "Stop"))
-        self.refreshBtn.setText(_translate("MainWindow", "Refresh"))
+        self.refreshBtn.setText(_translate("MainWindow", "Get Message"))
         self.label.setText(_translate("MainWindow", "NLP - Email to Speech"))
         self.label_3.setText(_translate("MainWindow", "From"))
         self.replayBtn.setText(_translate("MainWindow", "Replay"))
@@ -91,6 +91,11 @@ class Ui_MainWindow(object):
         self.playBtn.clicked.connect(pygame.mixer.music.unpause)
 
     def getEmail(self):
+        self.plainFrom.setReadOnly(False)
+        self.plainFrom.setPlainText('')
+        self.plainMessage.setReadOnly(False)
+        self.plainMessage.setPlainText('')
+
         email = self.function.get_message()
         sender = self.function.get_sender()
         self.plainFrom.setPlainText(sender)
