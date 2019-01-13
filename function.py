@@ -90,11 +90,10 @@ class email2speak:
         # here we have marked slow=False. Which tells
         # the module that the converted audio should
         # have a high speed
-        myobj = gTTS(text=message_final, lang=language, slow=False)
+        speech = gTTS(text=message_final, lang=language, slow=False)
 
         # Saving the converted audio in a mp3 file named
-        myobj.save("email.mp3")
-
+        speech.save("email.mp3")
 
     def play_audio(self):
         # Playing the converted file
